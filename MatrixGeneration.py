@@ -66,6 +66,74 @@ def makeRandomBook(base, m, n):
     return np.random.randint(0, base, (m, n))
 
 
+############## Additional Functions #################
+
+
+def getAbsoluteDist(row1, row2):
+    dist = 0
+    for i in range(row1.size):
+        dist += abs(row1[i] - row2[i])
+    return dist
+
+
+def getMinAbsoluteDist(book):
+    mindist = book.size
+    total = 0
+    for i, row1 in enumerate(book[:-1]):
+        for row2 in book[i+1:]:
+            dist = getAbsoluteDist(row1, row2)
+            total += dist
+            mindist = min(dist, mindist)
+    return mindist
+
+
+def getHammingDist(row1, row2):
+    dist = 0
+    for i in range(row1.size):
+        if row1[i] != row2[i]:
+            dist = dist + 1
+    return dist
+
+
+def getMinHammingDist(book):
+    mindist = book.size
+    total = 0
+    for i, row1 in enumerate(book[:-1]):
+        for row2 in book[i+1:]:
+            dist = getHammingDist(row1, row2)
+            total += dist
+            mindist = min(dist, mindist)
+    return mindist
+
+
+def bestMinHammingDistOfRandoms(base, m, n, numCodebooks):
+    bestCodebook = makeRandomBook(base, m, n)
+    bestMinDist = getMinHammingDist(
+        bestCodebook) + getMinHammingDist(np.transpose(bestCodebook))
+    for i in range(numCodebooks - 1):
+        codebook = makeRandomBook(base, m, n)
+        minDist = getMinHammingDist(
+            codebook) + getMinHammingDist(np.transpose(codebook))
+        if (minDist > bestMinDist):
+            bestCodebook = codebook
+            bestMinDist = minDist
+    return bestCodebook
+
+
+def bestMinAbsoluteDistOfRandoms(base, m, n, numCodebooks):
+    bestCodebook = makeRandomBook(base, m, n)
+    bestMinDist = getMinAbsoluteDist(
+        bestCodebook) + getMinAbsoluteDist(np.transpose(bestCodebook))
+    for i in range(numCodebooks - 1):
+        codebook = makeRandomBook(base, m, n)
+        minDist = getMinAbsoluteDist(
+            codebook) + getMinAbsoluteDist(np.transpose(codebook))
+        if (minDist > bestMinDist):
+            bestCodebook = codebook
+            bestMinDist = minDist
+    return bestCodebook
+
+
 STATUS_OPTIMAL = 0
 STATUS_RANDOM = 1
 STATUS_BEST_HAMMING_OF_1000 = 2
@@ -174,79 +242,33 @@ def makeBookWithInfo(base, m, n, status):
     return info
 
 
-############## Additional Functions #################
-
-
-def getAbsoluteDist(row1, row2):
-    dist = 0
-    for i in range(row1.size):
-        dist += abs(row1[i] - row2[i])
-    return dist
-
-
-def getMinAbsoluteDist(book):
-    mindist = book.size
-    total = 0
-    for i, row1 in enumerate(book[:-1]):
-        for row2 in book[i+1:]:
-            dist = getAbsoluteDist(row1, row2)
-            total += dist
-            mindist = min(dist, mindist)
-    return mindist
-
-
-def getHammingDist(row1, row2):
-    dist = 0
-    for i in range(row1.size):
-        if row1[i] != row2[i]:
-            dist = dist + 1
-    return dist
-
-
-def getMinHammingDist(book):
-    mindist = book.size
-    total = 0
-    for i, row1 in enumerate(book[:-1]):
-        for row2 in book[i+1:]:
-            dist = getHammingDist(row1, row2)
-            total += dist
-            mindist = min(dist, mindist)
-    return mindist
-
-
-def bestMinHammingDistOfRandoms(base, m, n, numCodebooks):
-    bestCodebook = makeRandomBook(base, m, n)
-    bestMinDist = getMinHammingDist(
-        bestCodebook) + getMinHammingDist(np.transpose(bestCodebook))
-    for i in range(numCodebooks - 1):
-        codebook = makeRandomBook(base, m, n)
-        minDist = getMinHammingDist(
-            codebook) + getMinHammingDist(np.transpose(codebook))
-        if (minDist > bestMinDist):
-            bestCodebook = codebook
-            bestMinDist = minDist
-    return bestCodebook
-
-
-def bestMinAbsoluteDistOfRandoms(base, m, n, numCodebooks):
-    bestCodebook = makeRandomBook(base, m, n)
-    bestMinDist = getMinAbsoluteDist(
-        bestCodebook) + getMinAbsoluteDist(np.transpose(bestCodebook))
-    for i in range(numCodebooks - 1):
-        codebook = makeRandomBook(base, m, n)
-        minDist = getMinAbsoluteDist(
-            codebook) + getMinAbsoluteDist(np.transpose(codebook))
-        if (minDist > bestMinDist):
-            bestCodebook = codebook
-            bestMinDist = minDist
-    return bestCodebook
-
-
 def printBookInfoForSpreadsheet(info):
     print(info["book"].tolist())
     for element in list(info)[1:]:
         print(info[element])
 
 
-printBookInfoForSpreadsheet(makeBookWithInfo(
-    23, 27, 27, STATUS_BEST_HAMMING_OF_1000))
+def printBookInfoReadable(info):
+    print(info["book"])
+    print()
+    for element in list(info)[1:]:
+        print(("    " + element + ":" + ("\t" * (5-(len(element)+5)//8)) +
+               str(round(info[element], 2))).expandtabs(8))
+
+
+def consoleUI():
+    readable = input("Readable (R) or Spreadsheet (S): ").upper
+    info = makeBookWithInfo(int(input("base: ")), int(input("m: ")), int(input("n: ")),
+                            int(input('''Status?
+    0 - Generalized Hadamard
+    1 - Single Random
+    2 - Best Random of 1000 (Hamming Distance)
+    3 - Best Random of 1000 (Absolute Distance)
+''')))
+    if (readable == "S"):
+        printBookInfoForSpreadsheet(info)
+    else:
+        printBookInfoReadable(info)
+
+
+consoleUI()
