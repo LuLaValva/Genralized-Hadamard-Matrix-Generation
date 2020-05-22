@@ -257,7 +257,7 @@ def printBookInfoReadable(info):
 
 
 def consoleUI():
-    readable = input("Readable (R) or Spreadsheet (S): ").upper
+    readable = input("Readable (R) or Spreadsheet (S): ").upper()
     info = makeBookWithInfo(int(input("base: ")), int(input("m: ")), int(input("n: ")),
                             int(input('''Status?
     0 - Generalized Hadamard
